@@ -21,7 +21,7 @@ vocab_data = [
     {"id": 12, "malay_word": "Pergi", "ipa_pronunciation": "/pər.gi/", "part_of_speech": "Verb", "english_meaning": "To go", "burmese_meaning": "သွားတယ်", "malay_example_sentence": "Awak pergi mana?", "burmese_example_translation": "ခင်ဗျား ဘယ်သွားမလို့လဲ။"},
     {"id": 13, "malay_word": "Ini", "ipa_pronunciation": "/i.ni/", "part_of_speech": "Pronoun", "english_meaning": "This", "burmese_meaning": "ဒါ / ဒီ", "malay_example_sentence": "Ini rumah saya.", "burmese_example_translation": "ဒါ ကျွန်တော့်အိမ်ပါ။"},
     {"id": 14, "malay_word": "Itu", "ipa_pronunciation": "/i.tu/", "part_of_speech": "Pronoun", "english_meaning": "That", "burmese_meaning": "ဟို / အဲဒါ", "malay_example_sentence": "Itu sangat mahal.", "burmese_example_translation": "အဲဒါ သိပ်ဈေးကြီးတယ်။"},
-{"id": 15, "malay_word": "Berapa", "ipa_pronunciation": "/bə.ra.pa/", "part_of_speech": "Adverb", "english_meaning": "How much", "burmese_meaning": "ဘယ်လောက်လဲ", "malay_example_sentence": "Berapa harga ini?", "burmese_example_translation": "ဒါ ဈေးဘယ်လောက်လဲ။"},
+    {"id": 15, "malay_word": "Berapa", "ipa_pronunciation": "/bə.ra.pa/", "part_of_speech": "Adverb", "english_meaning": "How much", "burmese_meaning": "ဘယ်လောက်လဲ", "malay_example_sentence": "Berapa harga ini?", "burmese_example_translation": "ဒါ ဈေးဘယ်လောက်လဲ။"},
     {"id": 16, "malay_word": "Di", "ipa_pronunciation": "/di/", "part_of_speech": "Preposition", "english_meaning": "At / In", "burmese_meaning": "မှာ (နေရာပြ)", "malay_example_sentence": "Saya ada di rumah.", "burmese_example_translation": "ကျွန်တော် အိမ်မှာ ရှိတယ်။"},
     {"id": 17, "malay_word": "Tandas", "ipa_pronunciation": "/tan.das/", "part_of_speech": "Noun", "english_meaning": "Toilet", "burmese_meaning": "အိမ်သာ", "malay_example_sentence": "Di mana tandas?", "burmese_example_translation": "အိမ်သာ ဘယ်နားမှာလဲ။"},
     {"id": 18, "malay_word": "Air", "ipa_pronunciation": "/a.ir/", "part_of_speech": "Noun", "english_meaning": "Water", "burmese_meaning": "ရေ", "malay_example_sentence": "Tolong bagi air.", "burmese_example_translation": "ရေတစ်ခွက်လောက် ပေးပါ။"},
@@ -44,15 +44,15 @@ if mode == "📚 Learning Hub":
     st.header("Learning Hub (လေ့လာရန်)")
     st.caption("Click on any card to see details.")
     for index, row in df.iterrows():
-        with st.expander(f"{row['malay_word']} ({row['part_of_speech']})"):
+        with st.expander(f"**{row['malay_word']}** ({row['part_of_speech']})"):
             c1, c2 = st.columns(2)
             with c1:
-                st.markdown(f"🗣 IPA: {row['ipa_pronunciation']}")
-                st.markdown(f"🇬🇧 English: {row['english_meaning']}")
-                st.markdown(f"🇲🇲 Myanmar: {row['burmese_meaning']}")
+                st.markdown(f"🗣 **IPA:** `{row['ipa_pronunciation']}`")
+                st.markdown(f"🇬🇧 **English:** {row['english_meaning']}")
+                st.markdown(f"🇲🇲 **Myanmar:** **{row['burmese_meaning']}**")
             with c2:
                 st.markdown("*Example:*")
-                st.info(f"{row['malay_example_sentence']}\n\n{row['burmese_example_translation']}")
+                st.info(f"**{row['malay_example_sentence']}**\n\n{row['burmese_example_translation']}")
 
 elif mode == "🎮 Quiz Arena":
     st.header("Quiz Arena (ဉာဏ်စမ်း)")
@@ -62,6 +62,70 @@ elif mode == "🎮 Quiz Arena":
         st.session_state.score = 0
     if 'total_questions' not in st.session_state:
         st.session_state.total_questions = 0
+    if 'current_quiz_data' not in st.session_state:
+        st.session_state.current_quiz_data = None
+    if 'quiz_answered' not in st.session_state:
+        st.session_state.quiz_answered = False
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Score", f"{st.session_state.score} / {st.session_state.total_questions}")
+    
+    if col3.button("🔄 Reset Score"):
+        st.session_state.score = 0
+        st.session_state.total_questions = 0
+        st.session_state.current_quiz_data = None
+        st.session_state.quiz_answered = False
+        st.rerun()
+
+    st.divider()
+
+    def generate_question():
+        target_row = df.sample(1).iloc[0]
+        correct_answer = target_row['burmese_meaning']
+        distractors = df[df['id'] != target_row['id']].sample(3)['burmese_meaning'].tolist()
+        options = distractors + [correct_answer]
+        random.shuffle(options)
+        return {
+            "word": target_row['malay_word'],
+            "correct": correct_answer,
+            "options": options,
+            "ipa": target_row['ipa_pronunciation']
+        }
+
+    if st.session_state.current_quiz_data is None:
+        st.session_state.current_quiz_data = generate_question()
+        st.session_state.quiz_answered = False
+
+    quiz = st.session_state.current_quiz_data
+
+    st.markdown(f"<div style='text-align: center; margin: 20px 0;'><h2 style='color: #FF4B4B; font-size: 40px;'>{quiz['word']}</h2><p style='color: grey;'>What is the Burmese meaning?</p></div>", unsafe_allow_html=True)
+
+    # Options Display
+    cols = st.columns(2)
+    
+    def check_answer(selected_option):
+        if st.session_state.quiz_answered:
+            return
+        st.session_state.quiz_answered = True
+        st.session_state.total_questions += 1
+        
+        if selected_option == quiz['correct']:
+            st.session_state.score += 1
+            st.toast(f"Correct! 🎉", icon="✅")
+        else:
+            st.toast(f"Wrong! It means '{quiz['correct']}'", icon="❌")
+
+    for idx, option in enumerate(quiz['options']):
+        col = cols[idx % 2]
+        with col:
+            if st.button(option, key=f"opt_{idx}", on_click=check_answer, args=(option,), disabled=st.session_state.quiz_answered, use_container_width=True):
+                pass
+
+    if st.session_state.quiz_answered:
+        if st.button("Next Question ➡️", type="primary", use_container_width=True):
+            st.session_state.current_quiz_data = generate_question()
+            st.session_state.quiz_answered = False
+            st.rerun()        st.session_state.total_questions = 0
     if 'current_quiz_data' not in st.session_state:
         st.session_state.current_quiz_data = None
     if 'quiz_answered' not in st.session_state:
