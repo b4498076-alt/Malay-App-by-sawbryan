@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import random
 
+# Page Setup
 st.set_page_config(page_title="Malay Master AI", page_icon="🇲🇾", layout="wide")
 
-# --- Data ---
+# --- DATA SECTION ---
 vocab_data = [
     {"id": 1, "malay_word": "Saya", "ipa_pronunciation": "/sa.ja/", "part_of_speech": "Pronoun", "english_meaning": "I / Me", "burmese_meaning": "ကျွန်တော် (male) / ကျွန်မ (female)", "malay_example_sentence": "Nama saya Ali.", "burmese_example_translation": "ကျွန်တော့်နာမည် အလီပါ။"},
     {"id": 2, "malay_word": "Awak", "ipa_pronunciation": "/a.waʔ/", "part_of_speech": "Pronoun", "english_meaning": "You", "burmese_meaning": "ခင်ဗျား (to male) / ရှင် (to female)", "malay_example_sentence": "Awak apa khabar?", "burmese_example_translation": "ခင်ဗျား နေကောင်းလား။"},
@@ -30,7 +31,7 @@ vocab_data = [
 
 df = pd.DataFrame(vocab_data)
 
-# --- Sidebar ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.title("🇲🇾 Malay Master")
     st.write("Your AI Language Coach")
@@ -38,7 +39,7 @@ with st.sidebar:
     st.divider()
     st.info("Developed with Gemini AI")
 
-# --- Main App ---
+# --- MAIN APP ---
 if mode == "📚 Learning Hub":
     st.header("Learning Hub (လေ့လာရန်)")
     st.caption("Click on any card to see details.")
@@ -55,14 +56,75 @@ if mode == "📚 Learning Hub":
 
 elif mode == "🎮 Quiz Arena":
     st.header("Quiz Arena (ဉာဏ်စမ်း)")
-    if 'score' not in st.session_state: st.session_state.score = 0
-    if 'total_questions' not in st.session_state: st.session_state.total_questions = 0
-    if 'current_quiz_data' not in st.session_state: st.session_state.current_quiz_data = None
-    if 'quiz_answered' not in st.session_state: st.session_state.quiz_answered = False
+    
+    # Session State Initialization
+    if 'score' not in st.session_state:
+        st.session_state.score = 0
+    if 'total_questions' not in st.session_state:
+        st.session_state.total_questions = 0
+    if 'current_quiz_data' not in st.session_state:
+        st.session_state.current_quiz_data = None
+    if 'quiz_answered' not in st.session_state:
+        st.session_state.quiz_answered = False
 
     col1, col2, col3 = st.columns(3)
     col1.metric("Score", f"{st.session_state.score} / {st.session_state.total_questions}")
     
+    if col3.button("🔄 Reset Score"):
+        st.session_state.score = 0
+        st.session_state.total_questions = 0
+        st.session_state.current_quiz_data = None
+        st.session_state.quiz_answered = False
+        st.rerun()
+
+    st.divider()
+
+    def generate_question():
+        target_row = df.sample(1).iloc[0]
+        correct_answer = target_row['burmese_meaning']
+        distractors = df[df['id'] != target_row['id']].sample(3)['burmese_meaning'].tolist()
+        options = distractors + [correct_answer]
+        random.shuffle(options)
+        return {
+            "word": target_row['malay_word'],
+            "correct": correct_answer,
+            "options": options,
+            "ipa": target_row['ipa_pronunciation']
+        }
+if st.session_state.current_quiz_data is None:
+        st.session_state.current_quiz_data = generate_question()
+        st.session_state.quiz_answered = False
+
+    quiz = st.session_state.current_quiz_data
+
+    st.markdown(f"<div style='text-align: center; margin: 20px 0;'><h2 style='color: #FF4B4B; font-size: 40px;'>{quiz['word']}</h2><p style='color: grey;'>What is the Burmese meaning?</p></div>", unsafe_allow_html=True)
+
+    # Options Display
+    cols = st.columns(2)
+    
+    def check_answer(selected_option):
+        if st.session_state.quiz_answered:
+            return
+        st.session_state.quiz_answered = True
+        st.session_state.total_questions += 1
+        
+        if selected_option == quiz['correct']:
+            st.session_state.score += 1
+            st.toast(f"Correct! 🎉", icon="✅")
+        else:
+            st.toast(f"Wrong! It means '{quiz['correct']}'", icon="❌")
+
+    for idx, option in enumerate(quiz['options']):
+        col = cols[idx % 2]
+        with col:
+            if st.button(option, key=f"opt_{idx}", on_click=check_answer, args=(option,), disabled=st.session_state.quiz_answered, use_container_width=True):
+                pass
+
+    if st.session_state.quiz_answered:
+        if st.button("Next Question ➡️", type="primary", use_container_width=True):
+            st.session_state.current_quiz_data = generate_question()
+            st.session_state.quiz_answered = False
+            st.rerun()    
     if col3.button("🔄 Reset Score"):
         st.session_state.score = 0
         st.session_state.total_questions = 0
