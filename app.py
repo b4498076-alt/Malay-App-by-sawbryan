@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import io
 import random
 
 # --- 1. Page Configuration ---
@@ -10,36 +9,33 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. The Data (Embedded) ---
-# This is the CSV data we generated earlier
-csv_data = """id,malay_word,ipa_pronunciation,part_of_speech,english_meaning,burmese_meaning,malay_example_sentence,burmese_example_translation,difficulty_level
-1,Saya,/sa.ja/,Pronoun,I / Me,ကျွန်တော် (male) / ကျွန်မ (female),Nama saya Ali.,ကျွန်တော့်နာမည် အလီပါ။,Beginner
-2,Awak,/a.waʔ/,Pronoun,You,ခင်ဗျား (to male) / ရှင် (to female),Awak apa khabar?,ခင်ဗျား နေကောင်းလား။,Beginner
-3,Makan,/ma.kan/,Verb,To eat,စားတယ်,Saya mahu makan nasi.,ကျွန်တော် ထမင်း စားချင်တယ်။,Beginner
-4,Minum,/mi.num/,Verb,To drink,သောက်တယ်,Jom minum air.,ရေ သွားသောက်ရအောင်။,Beginner
-5,Ya,/ja/,Particle,Yes,ဟုတ်ကဲ့,Ya, saya faham.,ဟုတ်ကဲ့၊ ကျွန်တော် နားလည်တယ်။,Beginner
-6,Tidak,/ti.daʔ/,Adverb,No / Not,မဟုတ်ဘူး / မ...ဘူး,Saya tidak tahu.,ကျွန်တော် မသိဘူး။,Beginner
-7,Terima kasih,/tə.ri.ma ka.seh/,Phrase,Thank you,ကျေးဇူးတင်ပါတယ်,Terima kasih banyak.,အများကြီး ကျေးဇူးတင်ပါတယ်။,Beginner
-8,Apa,/a.pa/,Pronoun,What,ဘာလဲ,Ini apa?,ဒါ ဘာလဲ။,Beginner
-9,Siapa,/si.a.pa/,Pronoun,Who,ဘယ်သူလဲ,Siapa nama awak?,ခင်ဗျားနာမည် ဘယ်သူလဲ။,Beginner
-10,Ada,/a.da/,Verb,To have / To exist,ရှိတယ်,Saya ada soalan.,ကျွန်တော့်မှာ မေးစရာ ရှိတယ်။,Beginner
-11,Mahu,/ma.hu/,Verb,To want,ချင်တယ် / လိုချင်တယ်,Saya mahu pulang.,ကျွန်တော် ပြန်ချင်တယ်။,Beginner
-12,Pergi,/pər.gi/,Verb,To go,သွားတယ်,Awak pergi mana?,ခင်ဗျား ဘယ်သွားမလို့လဲ။,Beginner
-13,Ini,/i.ni/,Pronoun,This,ဒါ / ဒီ,Ini rumah saya.,ဒါ ကျွန်တော့်အိမ်ပါ။,Beginner
-14,Itu,/i.tu/,Pronoun,That,ဟို / အဲဒါ,Itu sangat mahal.,အဲဒါ သိပ်ဈေးကြီးတယ်။,Beginner
-15,Berapa,/bə.ra.pa/,Adverb,How much / How many,ဘယ်လောက်လဲ,Berapa harga ini?,ဒါ ဈေးဘယ်လောက်လဲ။,Beginner
-16,Di,/di/,Preposition,At / In,မှာ (နေရာပြ),Saya ada di rumah.,ကျွန်တော် အိမ်မှာ ရှိတယ်။,Beginner
-17,Tandas,/tan.das/,Noun,Toilet / Restroom,အိမ်သာ,Di mana tandas?,အိမ်သာ ဘယ်နားမှာလဲ။,Beginner
-18,Air,/a.ir/,Noun,Water,ရေ,Tolong bagi air.,ရေတစ်ခွက်လောက် ပေးပါ။,Beginner
-19,Tolong,/to.loŋ/,Verb,Help / Please,ကူညီပါ / ကျေးဇူးပြု၍,Tolong saya.,ကျွန်တော့်ကို ကူညီပါ။,Beginner
-20,Selamat,/sə.la.mat/,Adjective,Safe (used in greetings),မင်္ဂလာပါ (နှုတ်ဆက်စကား),Selamat pagi.,မင်္ဂလာနံနက်ခင်းပါ။"""
+# --- 2. The Data (Bulletproof Method) ---
+# Using direct Python list to prevent CSV parsing errors
+vocab_data = [
+    {"id": 1, "malay_word": "Saya", "ipa_pronunciation": "/sa.ja/", "part_of_speech": "Pronoun", "english_meaning": "I / Me", "burmese_meaning": "ကျွန်တော် (male) / ကျွန်မ (female)", "malay_example_sentence": "Nama saya Ali.", "burmese_example_translation": "ကျွန်တော့်နာမည် အလီပါ။"},
+    {"id": 2, "malay_word": "Awak", "ipa_pronunciation": "/a.waʔ/", "part_of_speech": "Pronoun", "english_meaning": "You", "burmese_meaning": "ခင်ဗျား (to male) / ရှင် (to female)", "malay_example_sentence": "Awak apa khabar?", "burmese_example_translation": "ခင်ဗျား နေကောင်းလား။"},
+    {"id": 3, "malay_word": "Makan", "ipa_pronunciation": "/ma.kan/", "part_of_speech": "Verb", "english_meaning": "To eat", "burmese_meaning": "စားတယ်", "malay_example_sentence": "Saya mahu makan nasi.", "burmese_example_translation": "ကျွန်တော် ထမင်း စားချင်တယ်။"},
+    {"id": 4, "malay_word": "Minum", "ipa_pronunciation": "/mi.num/", "part_of_speech": "Verb", "english_meaning": "To drink", "burmese_meaning": "သောက်တယ်", "malay_example_sentence": "Jom minum air.", "burmese_example_translation": "ရေ သွားသောက်ရအောင်။"},
+    {"id": 5, "malay_word": "Ya", "ipa_pronunciation": "/ja/", "part_of_speech": "Particle", "english_meaning": "Yes", "burmese_meaning": "ဟုတ်ကဲ့", "malay_example_sentence": "Ya, saya faham.", "burmese_example_translation": "ဟုတ်ကဲ့၊ ကျွန်တော် နားလည်တယ်။"},
+    {"id": 6, "malay_word": "Tidak", "ipa_pronunciation": "/ti.daʔ/", "part_of_speech": "Adverb", "english_meaning": "No / Not", "burmese_meaning": "မဟုတ်ဘူး / မ...ဘူး", "malay_example_sentence": "Saya tidak tahu.", "burmese_example_translation": "ကျွန်တော် မသိဘူး။"},
+    {"id": 7, "malay_word": "Terima kasih", "ipa_pronunciation": "/tə.ri.ma ka.seh/", "part_of_speech": "Phrase", "english_meaning": "Thank you", "burmese_meaning": "ကျေးဇူးတင်ပါတယ်", "malay_example_sentence": "Terima kasih banyak.", "burmese_example_translation": "အများကြီး ကျေးဇူးတင်ပါတယ်။"},
+    {"id": 8, "malay_word": "Apa", "ipa_pronunciation": "/a.pa/", "part_of_speech": "Pronoun", "english_meaning": "What", "burmese_meaning": "ဘာလဲ", "malay_example_sentence": "Ini apa?", "burmese_example_translation": "ဒါ ဘာလဲ။"},
+    {"id": 9, "malay_word": "Siapa", "ipa_pronunciation": "/si.a.pa/", "part_of_speech": "Pronoun", "english_meaning": "Who", "burmese_meaning": "ဘယ်သူလဲ", "malay_example_sentence": "Siapa nama awak?", "burmese_example_translation": "ခင်ဗျားနာမည် ဘယ်သူလဲ။"},
+    {"id": 10, "malay_word": "Ada", "ipa_pronunciation": "/a.da/", "part_of_speech": "Verb", "english_meaning": "To have / To exist", "burmese_meaning": "ရှိတယ်", "malay_example_sentence": "Saya ada soalan.", "burmese_example_translation": "ကျွန်တော့်မှာ မေးစရာ ရှိတယ်။"},
+    {"id": 11, "malay_word": "Mahu", "ipa_pronunciation": "/ma.hu/", "part_of_speech": "Verb", "english_meaning": "To want", "burmese_meaning": "ချင်တယ် / လိုချင်တယ်", "malay_example_sentence": "Saya mahu pulang.", "burmese_example_translation": "ကျွန်တော် ပြန်ချင်တယ်။"},
+    {"id": 12, "malay_word": "Pergi", "ipa_pronunciation": "/pər.gi/", "part_of_speech": "Verb", "english_meaning": "To go", "burmese_meaning": "သွားတယ်", "malay_example_sentence": "Awak pergi mana?", "burmese_example_translation": "ခင်ဗျား ဘယ်သွားမလို့လဲ။"},
+    {"id": 13, "malay_word": "Ini", "ipa_pronunciation": "/i.ni/", "part_of_speech": "Pronoun", "english_meaning": "This", "burmese_meaning": "ဒါ / ဒီ", "malay_example_sentence": "Ini rumah saya.", "burmese_example_translation": "ဒါ ကျွန်တော့်အိမ်ပါ။"},
+    {"id": 14, "malay_word": "Itu", "ipa_pronunciation": "/i.tu/", "part_of_speech": "Pronoun", "english_meaning": "That", "burmese_meaning": "ဟို / အဲဒါ", "malay_example_sentence": "Itu sangat mahal.", "burmese_example_translation": "အဲဒါ သိပ်ဈေးကြီးတယ်။"},
+{"id": 15, "malay_word": "Berapa", "ipa_pronunciation": "/bə.ra.pa/", "part_of_speech": "Adverb", "english_meaning": "How much", "burmese_meaning": "ဘယ်လောက်လဲ", "malay_example_sentence": "Berapa harga ini?", "burmese_example_translation": "ဒါ ဈေးဘယ်လောက်လဲ။"},
+    {"id": 16, "malay_word": "Di", "ipa_pronunciation": "/di/", "part_of_speech": "Preposition", "english_meaning": "At / In", "burmese_meaning": "မှာ (နေရာပြ)", "malay_example_sentence": "Saya ada di rumah.", "burmese_example_translation": "ကျွန်တော် အိမ်မှာ ရှိတယ်။"},
+    {"id": 17, "malay_word": "Tandas", "ipa_pronunciation": "/tan.das/", "part_of_speech": "Noun", "english_meaning": "Toilet", "burmese_meaning": "အိမ်သာ", "malay_example_sentence": "Di mana tandas?", "burmese_example_translation": "အိမ်သာ ဘယ်နားမှာလဲ။"},
+    {"id": 18, "malay_word": "Air", "ipa_pronunciation": "/a.ir/", "part_of_speech": "Noun", "english_meaning": "Water", "burmese_meaning": "ရေ", "malay_example_sentence": "Tolong bagi air.", "burmese_example_translation": "ရေတစ်ခွက်လောက် ပေးပါ။"},
+    {"id": 19, "malay_word": "Tolong", "ipa_pronunciation": "/to.loŋ/", "part_of_speech": "Verb", "english_meaning": "Help / Please", "burmese_meaning": "ကူညီပါ / ကျေးဇူးပြု၍", "malay_example_sentence": "Tolong saya.", "burmese_example_translation": "ကျွန်တော့်ကို ကူညီပါ။"},
+    {"id": 20, "malay_word": "Selamat", "ipa_pronunciation": "/sə.la.mat/", "part_of_speech": "Greeting", "english_meaning": "Safe / Happy", "burmese_meaning": "မင်္ဂလာပါ (နှုတ်ဆက်စကား)", "malay_example_sentence": "Selamat pagi.", "burmese_example_translation": "မင်္ဂလာနံနက်ခင်းပါ။"}
+]
 
-# Load Data
-@st.cache_data
-def load_data():
-    return pd.read_csv(io.StringIO(csv_data))
-
-df = load_data()
+# Load Data into DataFrame
+df = pd.DataFrame(vocab_data)
 
 # --- 3. Sidebar Design ---
 with st.sidebar:
@@ -62,6 +58,103 @@ if mode == "📚 Learning Hub":
             with c1:
                 st.markdown(f"🗣 IPA: {row['ipa_pronunciation']}")
                 st.markdown(f"🇬🇧 English: {row['english_meaning']}")
+                st.markdown(f"🇲🇲 Myanmar: {row['burmese_meaning']}")
+            with c2:
+                st.markdown("*Example:*")
+                st.info(f"{row['malay_example_sentence']}\n\n{row['burmese_example_translation']}")
+
+elif mode == "🎮 Quiz Arena":
+    st.header("Quiz Arena (ဉာဏ်စမ်း)")
+    
+    # Initialize Session State
+    if 'score' not in st.session_state:
+        st.session_state.score = 0
+    if 'total_questions' not in st.session_state:
+        st.session_state.total_questions = 0
+    if 'current_quiz_data' not in st.session_state:
+        st.session_state.current_quiz_data = None
+    if 'quiz_answered' not in st.session_state:
+        st.session_state.quiz_answered = False
+
+    # Score Display
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Score", f"{st.session_state.score} / {st.session_state.total_questions}")
+    
+    # Reset Button
+    if col3.button("🔄 Reset Score"):
+        st.session_state.score = 0
+        st.session_state.total_questions = 0
+        st.session_state.current_quiz_data = None
+        st.session_state.quiz_answered = False
+        st.rerun()
+
+    st.divider()
+
+    # Function to generate question
+    def generate_question():
+        target_row = df.sample(1).iloc[0]
+        correct_answer = target_row['burmese_meaning']
+        
+        # Get 3 distractors
+        distractors = df[df['id'] != target_row['id']].sample(3)['burmese_meaning'].tolist()
+options = distractors + [correct_answer]
+        random.shuffle(options)
+        
+        return {
+            "word": target_row['malay_word'],
+            "correct": correct_answer,
+            "options": options,
+            "ipa": target_row['ipa_pronunciation']
+        }
+
+    # Load Question
+    if st.session_state.current_quiz_data is None:
+        st.session_state.current_quiz_data = generate_question()
+        st.session_state.quiz_answered = False
+
+    quiz = st.session_state.current_quiz_data
+
+    # Question UI
+    st.markdown(f"""
+    <div style="text-align: center; margin: 20px 0;">
+        <h2 style="color: #FF4B4B; font-size: 40px;">{quiz['word']}</h2>
+        <p style="color: grey;">What is the Burmese meaning?</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Display Options
+    cols = st.columns(2)
+    
+    def check_answer(selected_option):
+        if st.session_state.quiz_answered:
+            return
+            
+        st.session_state.quiz_answered = True
+        st.session_state.total_questions += 1
+        
+        if selected_option == quiz['correct']:
+            st.session_state.score += 1
+            st.toast(f"Correct! 🎉 '{quiz['word']}' means '{quiz['correct']}'", icon="✅")
+        else:
+            st.toast(f"Wrong! It means '{quiz['correct']}'", icon="❌")
+
+    # Render Buttons
+    for idx, option in enumerate(quiz['options']):
+        col = cols[idx % 2]
+        with col:
+            def on_click_callback(opt=option):
+                check_answer(opt)
+            
+            disabled = st.session_state.quiz_answered
+            if st.button(option, key=f"opt_{idx}", on_click=on_click_callback, disabled=disabled, use_container_width=True):
+                pass
+
+    # Next Button
+    if st.session_state.quiz_answered:
+        if st.button("Next Question ➡️", type="primary", use_container_width=True):
+            st.session_state.current_quiz_data = generate_question()
+            st.session_state.quiz_answered = False
+            st.rerun()                st.markdown(f"🇬🇧 English: {row['english_meaning']}")
                 st.markdown(f"🇲🇲 Myanmar: {row['burmese_meaning']}")
             with c2:
                 st.markdown("*Example:*")
